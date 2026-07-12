@@ -47,5 +47,3 @@ Contact
 - Maintainer: @Cybergeek1301
 
 ---
-
-If you'd like I can also scan the repository to fill in real installation and usage instructions and update this README accordingly.
