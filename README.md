@@ -36,7 +36,7 @@ Contributing
 - Add new provider modules under a providers/ (or equivalent) directory.
 
 License
-- Add license file (e.g., MIT). If you already have a LICENSE in the repo, I will update this section accordingly.
+- This project is licensed under the MIT License — see the LICENSE file for details.
 
 Acknowledgements
 - List libraries, datasets, or references used.
