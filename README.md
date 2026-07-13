@@ -1,49 +1,101 @@
-# Username-Recon (recon-toolkit)
+# Username Recon
 
 ![CI](https://github.com/Cybergeek1301/Username-Recon/actions/workflows/ci.yaml/badge.svg)
 
-Short description
-A lightweight toolkit for username reconnaissance: find, verify, and collect public profile information for a username across multiple online services.
+A lightweight, extensible Python CLI to check username availability across online services.
 
-Features
-- Enumerate username availability across many platforms (profiles, social sites, code hosts).
-- Collect publicly available profile metadata for found accounts.
-- Export results to JSON/CSV for downstream analysis.
-- Extensible — add new providers with simple adapters.
+## Features
 
-Quick start (template)
-1. Clone the repo:
-   git clone https://github.com/Cybergeek1301/Username-Recon.git
-   cd Username-Recon
+- ✅ Enumerate username availability across multiple platforms
+- ✅ Collect publicly available profile metadata
+- ✅ Export results to JSON/CSV
+- ✅ Extensible — add new providers with simple adapters
 
-2. Install dependencies (if applicable):
-   - If Python: python3 -m venv venv && source venv/bin/activate
-     pip install -r requirements.txt
-   - If other: see repository files for platform-specific instructions.
+## Quick start
 
-3. Run (replace with actual entrypoint below):
-   - Example (placeholder): python3 recon.py --username <username> --output results.json
+### Prerequisites
 
-Note: I couldn't detect the repository's actual entrypoint from the current README. If you want, I can scan the repo and replace the placeholder command with the real usage.
+- Python 3.10+
+- pip
 
-Configuration
-- Describe any config files, API keys, or rate-limit settings needed to run checks against certain providers.
+### Install (development)
 
-Output
-- JSON and/or CSV with fields such as:
-  - service, url, found (true/false), profile_data (object)
+```bash
+git clone https://github.com/Cybergeek1301/Username-Recon.git
+cd Username-Recon
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -e .[dev]
+```
 
-Contributing
-- PRs welcome. Please follow the repository code style and include tests for new providers.
-- Add new provider modules under a providers/ (or equivalent) directory.
+## Usage
 
-License
-- This project is licensed under the MIT License — see the LICENSE file for details.
+```bash
+# Check a username and print JSON to stdout
+recon --username octocat
 
-Acknowledgements
-- List libraries, datasets, or references used.
+# Save as CSV
+recon --username octocat --format csv --output octocat.csv
+```
 
-Contact
-- Maintainer: @Cybergeek1301
+## Output Format
 
+Results are returned as a list of objects:
 
+```json
+[
+  {
+    "service": "github",
+    "url": "https://github.com/octocat",
+    "found": true,
+    "profile_data": {
+      "id": 1,
+      "name": "The Octocat",
+      "company": "GitHub"
+    }
+  }
+]
+```
+
+CSV export flattens `profile_data` as a JSON string.
+
+## Development
+
+### Adding new providers
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+Quick start:
+1. Create a new file under `username_recon/providers/` (e.g., `twitter.py`)
+2. Implement a `check(username)` function that returns a dict with:
+   - `service` (str): Name of the service
+   - `url` (str): Profile URL
+   - `found` (bool): Whether username exists
+   - `profile_data` (dict): Public profile info or empty dict
+
+3. Import and add it to `username_recon/cli.py`
+
+### Running tests
+
+```bash
+pytest              # Run all tests
+pytest -v           # Verbose output
+pytest --cov        # With coverage report
+```
+
+## Security & Responsible Use
+
+This tool is designed for **legitimate security research and account verification only**. Users are responsible for:
+
+- Respecting rate limits and platform terms of service
+- Obtaining proper authorization before using on third-party accounts
+- Complying with local laws regarding data collection and privacy
+- Not using this for spam, harassment, or unauthorized profiling
+
+## Configuration
+
+No API keys required for the default GitHub provider. Additional providers may require configuration — see their documentation in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT — see LICENSE file
