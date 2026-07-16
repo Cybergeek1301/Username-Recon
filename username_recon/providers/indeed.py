@@ -3,7 +3,7 @@
 This example uses a lightweight HTTP request and returns a standard result dict:
 {
   "service": "indeed",
-  "url": "https://profile.indeed.com/<username>",
+  "url": "https://profile.indeed.com/p/<username>",
   "found": True/False,
   "profile_data": { ... }
 }
@@ -14,7 +14,7 @@ Extend profile_data scraping as needed (rate limiting, API usage, authentication
 import requests
 
 SERVICE = "indeed"
-BASE_URL = "https://profile.indeed.com"
+BASE_URL = "https://profile.indeed.com/p"
 
 
 def check(username, timeout=5.0):

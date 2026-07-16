@@ -1,7 +1,7 @@
-import json
-import csv
+import os
 import sys
 import click
+import concurrent.futures
 from .providers import github as github_provider
 from .providers import instagram as instagram_provider
 from .providers import tiktok as tiktok_provider
@@ -20,62 +20,71 @@ from .providers import roblox as roblox_provider
 from .providers import telegram as telegram_provider
 from .providers import indeed as indeed_provider
 
+
 @click.command()
 @click.option("--username", "username", required=True, help="Username to check across providers")
-@click.option("--output", "output", default=None, help="Output file path (defaults to stdout)")
-@click.option("--format", "outfmt", default="json", type=click.Choice(["json","csv"]), help="Output format")
+@click.option("--output", "output", default=None, help="Output file")
+@click.option("--format", "outfmt", default="json", help="Output format: json or csv")
 def main(username, output, outfmt):
-    """Simple recon CLI that checks a username against example providers.
-
-    This is intentionally small: add more providers under username_recon.providers.
-    """
     results = []
 
-    # Run providers
-    results.append(github_provider.check(username))
-    results.append(instagram_provider.check(username))
-    results.append(tiktok_provider.check(username))
-    results.append(reddit_provider.check(username))
-    results.append(youtube_provider.check(username))
-    results.append(discord_provider.check(username))
-    results.append(twitch_provider.check(username))
-    results.append(facebook_provider.check(username))
-    results.append(bluesky_provider.check(username))
-    results.append(mastodon_provider.check(username))
-    results.append(linkedin_provider.check(username))
-    results.append(twitter_x_provider.check(username))
-    results.append(mewe_provider.check(username))
-    results.append(pinterest_provider.check(username))
-    results.append(roblox_provider.check(username))
-    results.append(telegram_provider.check(username))
-    results.append(indeed_provider.check(username))
+    # List of all provider modules
+    providers = [
+        github_provider,
+        instagram_provider,
+        tiktok_provider,
+        reddit_provider,
+        youtube_provider,
+        discord_provider,
+        twitch_provider,
+        facebook_provider,
+        bluesky_provider,
+        mastodon_provider,
+        linkedin_provider,
+        twitter_x_provider,
+        mewe_provider,
+        pinterest_provider,
+        roblox_provider,
+        telegram_provider,
+        indeed_provider,
+    ]
+
+    # Run providers in parallel using ThreadPoolExecutor
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # Submit all provider checks
+        futures = [executor.submit(p.check, username) for p in providers]
+        
+        # Collect results as they complete
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as e:
+                # Log error but don't crash the entire scan
+                click.echo(f"Error in provider: {e}", err=True)
 
     # Serialize
     if outfmt == "json":
-        data = json.dumps(results, indent=2)
-        if output:
-            with open(output, "w", encoding="utf-8") as f:
-                f.write(data)
-        else:
-            click.echo(data)
-    else:
-        # CSV: flatten profile_data as JSON string
-        fieldnames = ["service","url","found","profile_data"]
-        if output:
-            f = open(output, "w", newline="", encoding="utf-8")
-        else:
-            f = sys.stdout
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        import json
+        output_str = json.dumps(results, indent=2)
+    elif outfmt == "csv":
+        import csv
+        from io import StringIO
+        output = StringIO()
+        writer = csv.DictWriter(output, fieldnames=["service", "url", "found"])
         writer.writeheader()
-        for r in results:
-            writer.writerow({
-                "service": r.get("service"),
-                "url": r.get("url"),
-                "found": r.get("found"),
-                "profile_data": json.dumps(r.get("profile_data", {}), ensure_ascii=False)
-            })
-        if output:
-            f.close()
+        for result in results:
+            writer.writerow(
+                {"service": result.get("service"), "url": result.get("url"), "found": result.get("found")}
+            )
+        output_str = output.getvalue()
+    else:
+        click.echo(f"Unknown format: {outfmt}", err=True)
+        sys.exit(1)
 
-if __name__ == "__main__":
-    main()
+    if output:
+        with open(output, "w") as f:
+            f.write(output_str)
+        click.echo(f"Results written to {output}")
+    else:
+        click.echo(output_str)

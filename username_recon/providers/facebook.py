@@ -22,11 +22,12 @@ def check(username, timeout=5.0):
     try:
         # Use a HEAD request first to avoid downloading page body
         resp = requests.head(url, timeout=timeout, allow_redirects=True)
-        found = resp.status_code == 200
+        # Facebook redirects unauthenticated requests to login or checkpoint pages.
+        # Check status code and verify we didn't get redirected to login or checkpoint.
+        found = resp.status_code == 200 and "login" not in resp.url and "checkpoint" not in resp.url
     except requests.RequestException:
         # On network errors, mark as not found and attach no profile data
         return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}
 
     profile_data = {}
-    # Optionally, we could fetch more details with a GET request or Facebook Graph API
     return {"service": SERVICE, "url": url, "found": found, "profile_data": profile_data}

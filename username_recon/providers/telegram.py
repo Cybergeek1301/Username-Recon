@@ -21,13 +21,14 @@ BASE_URL = "https://t.me"
 def check(username, timeout=5.0):
     url = f"{BASE_URL}/{username}"
     try:
-        # Use a HEAD request first to avoid downloading page body
-        resp = requests.head(url, timeout=timeout, allow_redirects=True)
-        found = resp.status_code == 200
+        # Telegram's t.me/<username> pages always return 200 OK even if the username
+        # does not exist (they display a generic page saying 'If you have Telegram, you can contact...').
+        # We must use a GET request and check the response body to ensure this placeholder text is not present.
+        resp = requests.get(url, timeout=timeout)
+        found = resp.status_code == 200 and "If you have Telegram, you can contact" not in resp.text
     except requests.RequestException:
         # On network errors, mark as not found and attach no profile data
         return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}
 
     profile_data = {}
-    # Optionally, we could fetch more details with a GET request or Telegram API
     return {"service": SERVICE, "url": url, "found": found, "profile_data": profile_data}
