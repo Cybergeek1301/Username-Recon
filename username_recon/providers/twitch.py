@@ -28,5 +28,4 @@ def check(username, timeout=5.0):
         return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}
 
     profile_data = {}
-    # Optionally, we could fetch more details with a GET request or Twitch API
     return {"service": SERVICE, "url": url, "found": found, "profile_data": profile_data}

@@ -22,7 +22,9 @@ def check(username, timeout=5.0):
     try:
         # Use a HEAD request first to avoid downloading page body
         resp = requests.head(url, timeout=timeout, allow_redirects=True)
-        found = resp.status_code == 200
+        # Twitter/X redirects unauthenticated requests to login page.
+        # Check status code and verify we didn't get redirected to login.
+        found = resp.status_code == 200 and "login" not in resp.url
     except requests.RequestException:
         # On network errors, mark as not found and attach no profile data
         return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}

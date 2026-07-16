@@ -3,7 +3,7 @@
 This example uses a lightweight HTTP request and returns a standard result dict:
 {
   "service": "discord",
-  "url": "https://discordapp.com/users/<username>",
+  "url": "https://discord.com/users/<username>",
   "found": True/False,
   "profile_data": { ... }
 }
@@ -14,19 +14,23 @@ Extend profile_data scraping as needed (rate limiting, API usage, authentication
 import requests
 
 SERVICE = "discord"
+BASE_URL = "https://discord.com/users"
 
 
 def check(username, timeout=5.0):
-    # Discord username validation is primarily API-based
-    # This is a basic check using the Discord API
-    url = f"https://discord.com/api/v10/users/search?q={username}"
+    """Check if Discord user exists via profile URL.
+    
+    Note: The public Discord API search endpoint requires authentication.
+    This check uses the web profile URL pattern instead.
+    """
+    url = f"{BASE_URL}/{username}"
     try:
-        resp = requests.get(url, timeout=timeout)
-        # Discord API typically returns 200 for valid requests
-        found = resp.status_code == 200 and len(resp.json().get('users', [])) > 0
+        # Use a HEAD request first to avoid downloading page body
+        resp = requests.head(url, timeout=timeout, allow_redirects=True)
+        found = resp.status_code == 200
     except requests.RequestException:
         # On network errors, mark as not found and attach no profile data
-        return {"service": SERVICE, "url": f"https://discord.com/users/{username}", "found": False, "profile_data": {}}
+        return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}
 
     profile_data = {}
-    return {"service": SERVICE, "url": f"https://discord.com/users/{username}", "found": found, "profile_data": profile_data}
+    return {"service": SERVICE, "url": url, "found": found, "profile_data": profile_data}

@@ -22,7 +22,9 @@ def check(username, timeout=5.0):
     try:
         # Use a HEAD request first to avoid downloading page body
         resp = requests.head(url, timeout=timeout, allow_redirects=True)
-        found = resp.status_code == 200
+        # LinkedIn redirects unauthenticated requests to an authwall page.
+        # Check status code and verify we didn't get redirected to authwall or login.
+        found = resp.status_code == 200 and "authwall" not in resp.url and "login" not in resp.url
     except requests.RequestException:
         # On network errors, mark as not found and attach no profile data
         return {"service": SERVICE, "url": url, "found": False, "profile_data": {}}

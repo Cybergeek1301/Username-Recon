@@ -3,7 +3,7 @@
 This example uses a lightweight HTTP request and returns a standard result dict:
 {
   "service": "roblox",
-  "url": "https://www.roblox.com/user/<username>",
+  "url": "https://www.roblox.com/users/profile?username=<username>",
   "found": True/False,
   "profile_data": { ... }
 }
@@ -14,11 +14,11 @@ Extend profile_data scraping as needed (rate limiting, API usage, authentication
 import requests
 
 SERVICE = "roblox"
-BASE_URL = "https://www.roblox.com/user"
+BASE_URL = "https://www.roblox.com/users/profile?username="
 
 
 def check(username, timeout=5.0):
-    url = f"{BASE_URL}/{username}"
+    url = f"{BASE_URL}{username}"
     try:
         # Use a HEAD request first to avoid downloading page body
         resp = requests.head(url, timeout=timeout, allow_redirects=True)
