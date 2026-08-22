@@ -19,6 +19,20 @@ from .providers import pinterest as pinterest_provider
 from .providers import roblox as roblox_provider
 from .providers import telegram as telegram_provider
 from .providers import indeed as indeed_provider
+from .providers import spotify as spotify_provider
+from .providers import pof as pof_provider
+from .providers import lemon8 as lemon8_provider
+from .providers import snapchat as snapchat_provider
+from .providers import whatsapp as whatsapp_provider
+from .providers import truth_social as truth_social_provider
+from .providers import kik as kik_provider
+from .providers import google_maps as google_maps_provider
+from .providers import wave as wave_provider
+from .providers import parler as parler_provider
+from .providers import whitepages as whitepages_provider
+from .providers import people_finder as people_finder_provider
+from .providers import social_catfish as social_catfish_provider
+from .providers import tumblr as tumblr_provider
 
 
 @click.command()
@@ -47,6 +61,20 @@ def main(username, output, outfmt):
         roblox_provider,
         telegram_provider,
         indeed_provider,
+        spotify_provider,
+        pof_provider,
+        lemon8_provider,
+        snapchat_provider,
+        whatsapp_provider,
+        truth_social_provider,
+        kik_provider,
+        google_maps_provider,
+        wave_provider,
+        parler_provider,
+        whitepages_provider,
+        people_finder_provider,
+        social_catfish_provider,
+        tumblr_provider,
     ]
 
     # Run providers in parallel using ThreadPoolExecutor
